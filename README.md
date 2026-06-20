@@ -1,6 +1,6 @@
 # AI Assignment Project
 
-This repository contains Java implementations of fundamental Artificial Intelligence algorithms and interactive environments, organized into clean, modular workspaces.
+This repository contains Java implementations of fundamental Artificial Intelligence algorithms : Hiddem Markov Model, Alpha Beta Pruning, Minimax algorithm.
 
 ---
 
