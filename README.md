@@ -1,6 +1,6 @@
 # AI Assignment Project
 
-This repository contains professional Java implementations of fundamental Artificial Intelligence algorithms and interactive environments, organized into clean, modular workspaces.
+This repository contains Java implementations of fundamental Artificial Intelligence algorithms and interactive environments, organized into clean, modular workspaces.
 
 ---
 
@@ -9,12 +9,13 @@ This repository contains professional Java implementations of fundamental Artifi
 ```text
 ArtificialIntelligence-Assignment/
 ├── README.md               # Project documentation
-├── alphabeta/
+├── AlphaBeta/
 │   └── AlphaBetaVisualizer.java  # Game Tree Alpha-Beta search & DOT generator
-├── hmm/
+├── Hidden Markov Model/
 │   ├── ViterbiHMM.java     # Network Intrusion Detection Viterbi decoder
-│   └── network_security_hmm_plot.png # Plotted probability path state curve
-└── tictactoe/
+│   └── HMM probability plot.png # Plotted probability path state curve
+│   └── HMM output.png # Console Output
+└── MiniMax Algorithm/
     └── TicTacToe.java      # Premium Swing UI Tic-Tac-Toe Minimax Game
 ```
 
@@ -47,7 +48,7 @@ Implementation of the Viterbi algorithm for finding the most likely sequence of 
 - Calculates explicit joint state-path log probabilities.
 - Computes optimal hidden state sequences.
 - Formats and prints a structured console text data-grid logging matrix trajectories over runtime.
-- Includes an exported probability path curve (`network_security_hmm_plot.png`) showing state boundary crossovers.
+- Includes an exported probability path curve (`HMM probability plot.png`) showing state boundary crossovers.
 
 ---
 
@@ -139,12 +140,6 @@ java TicTacToe
 ---
 
 ## Troubleshooting
-
-### `error: file not found: AlphaBetaVisualizer.java`
-**Solution:** Ensure you are inside the correct subdirectory before compiling. Use `cd alphabeta` first.
-
-### `javac: command not found`
-**Solution:** JDK is not installed or not added to your system `PATH`. Download JDK from [https://adoptium.net](https://adoptium.net) and follow setup instructions for your OS.
 
 ### Swing GUI does not open
 **Solution:** Ensure you are running Java in a desktop environment. Headless server environments do not support `javax.swing`. Use a local machine or IDE instead.
