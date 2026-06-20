@@ -1,0 +1,185 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class AlphaBetaVisualizer {
+
+   
+    public static class VisualTreeNode {
+        public String name;
+        public Integer value;
+        public boolean isMax;
+        public List<VisualTreeNode> children;
+        
+        public boolean visited;
+        public double finalAlpha;
+        public double finalBeta;
+
+        public VisualTreeNode(String name, Integer value, boolean isMax) {
+            this.name = name;
+            this.value = value;
+            this.isMax = isMax;
+            this.children = new ArrayList<>();
+            this.visited = false;
+            this.finalAlpha = Double.NEGATIVE_INFINITY;
+            this.finalBeta = Double.POSITIVE_INFINITY;
+        }
+
+        public void addChild(VisualTreeNode childNode) {
+            this.children.add(childNode);
+        }
+    }
+
+    public static class PrunedEdge {
+        public String parent;
+        public String child;
+
+        public PrunedEdge(String parent, String child) {
+            this.parent = parent;
+            this.child = child;
+        }
+
+        @Override
+        public String toString() {
+            return "(" + parent + " -> " + child + ")";
+        }
+    }
+
+    public static double alphaBetaVisual(VisualTreeNode node, double alpha, double beta, boolean isMaximizing, List<PrunedEdge> prunedEdges) {
+        node.visited = true;
+
+        // Base case: Leaf node evaluation
+        if (node.children.isEmpty()) {
+            node.finalAlpha = alpha;
+            node.finalBeta = beta;
+            return node.value;
+        }
+
+        if (isMaximizing) {
+            double bestVal = Double.NEGATIVE_INFINITY;
+            for (int i = 0; i < node.children.size(); i++) {
+                VisualTreeNode child = node.children.get(i);
+                
+                double value = alphaBetaVisual(child, alpha, beta, false, prunedEdges);
+                bestVal = Math.max(bestVal, value);
+                alpha = Math.max(alpha, bestVal);
+
+                
+                if (beta <= alpha) {
+                    
+                    for (int j = i + 1; j < node.children.size(); j++) {
+                        prunedEdges.add(new PrunedEdge(node.name, node.children.get(j).name));
+                    }
+                    break;
+                }
+            }
+            node.value = (int) bestVal;
+            node.finalAlpha = alpha;
+            node.finalBeta = beta;
+            return bestVal;
+        } else {
+            double bestVal = Double.POSITIVE_INFINITY;
+            for (int i = 0; i < node.children.size(); i++) {
+                VisualTreeNode child = node.children.get(i);
+                
+                double value = alphaBetaVisual(child, alpha, beta, true, prunedEdges);
+                bestVal = Math.min(bestVal, value);
+                beta = Math.min(beta, bestVal);
+
+            
+                if (beta <= alpha) {
+                    
+                    for (int j = i + 1; j < node.children.size(); j++) {
+                        prunedEdges.add(new PrunedEdge(node.name, node.children.get(j).name));
+                    }
+                    break;
+                }
+            }
+            node.value = (int) bestVal;
+            node.finalAlpha = alpha;
+            node.finalBeta = beta;
+            return bestVal;
+        }
+    }
+
+    public static void buildGraphvizTree(VisualTreeNode node, StringBuilder sb, List<PrunedEdge> prunedEdges) {
+        String typeStr = node.isMax ? "MAX" : "MIN";
+        String valStr = (node.value != null) ? String.valueOf(node.value) : "?";
+        String alphaStr = (node.finalAlpha == Double.NEGATIVE_INFINITY) ? "-\\u221E" : String.format("%.0f", node.finalAlpha);
+        String betaStr = (node.finalBeta == Double.POSITIVE_INFINITY) ? "\\u221E" : String.format("%.0f", node.finalBeta);
+
+        if (node.children.isEmpty()) {
+            
+            sb.append(String.format("    \"%s\" [label=\"%s\\nValue: %s\", shape=box];\n", node.name, node.name, valStr));
+        } else {
+           
+            String shapeType = node.isMax ? "triangle" : "invtriangle";
+            String label = String.format("%s\\n(%s)\\nVal: %s\\nalpha:%s | beta:%s", node.name, typeStr, valStr, alphaStr, betaStr);
+            sb.append(String.format("    \"%s\" [label=\"%s\", shape=%s];\n", node.name, label, shapeType));
+        }
+
+        for (VisualTreeNode child : node.children) {
+            buildGraphvizTree(child, sb, prunedEdges);
+
+            
+            boolean isPruned = false;
+            for (PrunedEdge edge : prunedEdges) {
+                if (edge.parent.equals(node.name) && edge.child.equals(child.name)) {
+                    isPruned = true;
+                    break;
+                }
+            }
+
+            if (isPruned) {
+                sb.append(String.format("    \"%s\" -> \"%s\" [style=dashed, color=gray, label=\"PRUNED\"];\n", node.name, child.name));
+            } else {
+                sb.append(String.format("    \"%s\" -> \"%s\" [style=solid];\n", node.name, child.name));
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        
+        VisualTreeNode root = new VisualTreeNode("Root", null, true);
+
+        VisualTreeNode b1 = new VisualTreeNode("B1", null, false);
+        VisualTreeNode b2 = new VisualTreeNode("B2", null, false);
+        root.addChild(b1);
+        root.addChild(b2);
+
+        VisualTreeNode c1 = new VisualTreeNode("C1", null, true);
+        VisualTreeNode c2 = new VisualTreeNode("C2", null, true);
+        VisualTreeNode c3 = new VisualTreeNode("C3", null, true);
+        VisualTreeNode c4 = new VisualTreeNode("C4", null, true);
+        b1.addChild(c1);
+        b1.addChild(c2);
+        b2.addChild(c3);
+        b2.addChild(c4);
+
+        // --- NEW VALUES ASSIGNED ---
+        c1.addChild(new VisualTreeNode("L1", 4, true));
+        c1.addChild(new VisualTreeNode("L2", 8, true));
+        c2.addChild(new VisualTreeNode("L3", 5, true));
+        c2.addChild(new VisualTreeNode("L4", 2, true));
+
+        c3.addChild(new VisualTreeNode("L5", 7, true));
+        c3.addChild(new VisualTreeNode("L6", 10, true));
+        c4.addChild(new VisualTreeNode("L7", 1, true));
+        c4.addChild(new VisualTreeNode("L8", 3, true));
+
+        List<PrunedEdge> prunedList = new ArrayList<>();
+
+        System.out.println("Executing Alpha-Beta Search...");
+        double optimalValue = alphaBetaVisual(root, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, true, prunedList);
+        
+        System.out.println("Alpha-Beta execution completed. Optimal value: " + (int)optimalValue);
+        System.out.println("Pruned structural connections detected: " + prunedList);
+
+        // Generate the output DOT script string
+        StringBuilder dotScript = new StringBuilder();
+        dotScript.append("digraph G {\n");
+        dotScript.append("    rankdir=TB;\n");
+        buildGraphvizTree(root, dotScript, prunedList);
+        dotScript.append("}\n");
+        System.out.println(dotScript.toString());
+    }
+}
